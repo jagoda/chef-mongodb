@@ -17,19 +17,6 @@ if node['mongodb']['replicaset_name'].nil? && node.mongodb.is_replicaset
   end
 end
 
-# just-in-case config file drop
-template node['mongodb']['dbconfig_file'] do
-  cookbook node['mongodb']['template_cookbook']
-  source node['mongodb']['dbconfig_file_template']
-  group node['mongodb']['root_group']
-  owner 'root'
-  mode 0644
-  variables(
-    :config => node['mongodb']['config']
-  )
-  action :create_if_missing
-end
-
 # and we install our own init file
 if node['mongodb']['apt_repo'] == 'ubuntu-upstart'
   init_file = File.join(node['mongodb']['init_dir'], "#{node['mongodb']['default_init_name']}.conf")
@@ -72,6 +59,19 @@ package node[:mongodb][:package_name] do
   options packager_opts
   action :install
   version node[:mongodb][:package_version]
+end
+
+# just-in-case config file drop
+template node['mongodb']['dbconfig_file'] do
+  cookbook node['mongodb']['template_cookbook']
+  source node['mongodb']['dbconfig_file_template']
+  group node['mongodb']['root_group']
+  owner 'root'
+  mode 0644
+  variables(
+    :config => node['mongodb']['config']
+  )
+  action :create
 end
 
 # Create keyFile if specified
